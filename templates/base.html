@@ -38,21 +38,21 @@
             <button id="hamburger" class="hamburger" aria-controls="site-sidebar" aria-expanded="false" aria-label="Mostrar navegación">☰</button>
             <div class="search">{% block search %}{% endblock %}</div>
             <div class="top-actions">
-              <div class="notifications">
-                <a href="#" title="Notificaciones">🔔
-                  {% if unread_notifications_count and unread_notifications_count > 0 %}
-                    <span class="badge">{{ unread_notifications_count }}</span>
-                  {% endif %}
-                </a>
-              </div>
               <div class="user-menu">
-                {% if user.is_authenticated %}
-                  <span class="user-name">{{ user.username }}</span>
-                  <a href="/admin/logout/">Salir</a>
-                {% else %}
-                  <a href="/admin/login/">Ingresar</a>
-                {% endif %}
-              </div>
+                  {% if user.is_authenticated %}
+                    <div class="user-auth">
+                      <img src="{% static 'Accesso_garantizado.png' %}" alt="Acceso garantizado" class="accesso-icon" aria-hidden="true"/>
+                      <span class="user-name">{{ user.username }}</span>
+                      <a href="/admin/logout/" title="Salir" class="logout-link">
+                        <img src="{% static 'Salir.png' %}" alt="Salir" class="logout-icon" />
+                      </a>
+                    </div>
+                  {% else %}
+                    <a href="/admin/login/" title="Ingresar">
+                      <img src="{% static 'Access.png' %}" alt="Ingresar" class="login-icon" />
+                    </a>
+                  {% endif %}
+                </div>
             </div>
           </div>
         </header>
@@ -71,9 +71,8 @@
       <div class="container">
         <p>
           Impulsa Gestión — &copy; 2025 — Desarrollado por
-          <a href="https://www.bytenco.com.ar" target="_blank" rel="noopener noreferrer" class="bytenco-credit">
+          <a href="https://www.bytenco.com.ar" target="_blank" rel="noopener noreferrer" class="bytenco-credit" aria-label="Bytenco">
             <img src="{% static 'Bytenco_reducido.png' %}" alt="Bytenco" class="bytenco-logo"/>
-            Bytenco
           </a>
         </p>
       </div>

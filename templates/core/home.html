@@ -1,8 +1,12 @@
 {% extends 'base.html' %}
-{% block title %}Inicio — Impulsa{% endblock %}
+{% load static %}
+{% block title %}Impulsa — Gestión{% endblock %}
 {% block content %}
-  <h1>Impulsa - Plataforma de gestión</h1>
-  <div class="card">
-    <p>Selecciona un módulo desde la navegación superior.</p>
-  </div>
+  <section class="hero">
+    <div class="hero-inner">
+      <img src="{% static 'FullLogo_Transparent.png' %}" alt="Impulsa" class="hero-logo" />
+      <h1>Impulsa - Plataforma de Gestión Integral</h1>
+      <p class="lead">Selecciona un módulo desde la barra de navegación izquierda.</p>
+    </div>
+  </section>
 {% endblock %}

@@ -28,5 +28,22 @@
       sidebar.setAttribute('aria-hidden', 'true');
       hamburger.setAttribute('aria-expanded', 'false');
     });
+
+    // Footer behavior: fix footer only on wide screens or when page is short
+    function evaluateFooterFixed(){
+      var body = document.body;
+      var shouldFix = (window.innerWidth >= 900) || (document.documentElement.scrollHeight <= window.innerHeight);
+      if(shouldFix){
+        body.classList.add('footer-fixed');
+      } else {
+        body.classList.remove('footer-fixed');
+      }
+    }
+
+    // Run on load and resize
+    evaluateFooterFixed();
+    window.addEventListener('resize', function(){
+      evaluateFooterFixed();
+    });
   });
 })();
