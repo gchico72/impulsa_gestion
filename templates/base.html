@@ -1,0 +1,74 @@
+{% load static %}
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %}Impulsa Gestión{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'css/site.css' %}">
+  </head>
+  <body>
+    <div class="layout">
+      <aside class="sidebar">
+        <div class="sidebar-brand">
+          <a href="/"><img src="{% static 'FullLogo_Transparent.png' %}" alt="Impulsa"/></a>
+        </div>
+        <nav class="sidebar-nav">
+          <a href="/">Inicio</a>
+          <a href="/students/">Alumnos</a>
+          <a href="/courses/">Cursos</a>
+          <a href="/teachers/">Docentes</a>
+          <a href="/projects/">Proyectos</a>
+          <a href="/cooperadora/">Cooperadora</a>
+          <a href="/admin/">Admin</a>
+        </nav>
+        <div class="sidebar-roles">
+          {% if user.is_authenticated %}
+            <strong>Roles:</strong>
+            <ul>
+              {% for r in user_roles %}<li>{{ r }}</li>{% empty %}<li>--</li>{% endfor %}
+            </ul>
+          {% endif %}
+        </div>
+      </aside>
+
+      <div class="main-area">
+        <header class="topbar">
+          <div class="container topbar-inner">
+            <div class="search">{% block search %}{% endblock %}</div>
+            <div class="top-actions">
+              <div class="notifications">
+                <a href="#" title="Notificaciones">🔔
+                  {% if unread_notifications_count and unread_notifications_count > 0 %}
+                    <span class="badge">{{ unread_notifications_count }}</span>
+                  {% endif %}
+                </a>
+              </div>
+              <div class="user-menu">
+                {% if user.is_authenticated %}
+                  <span class="user-name">{{ user.username }}</span>
+                  <a href="/admin/logout/">Salir</a>
+                {% else %}
+                  <a href="/admin/login/">Ingresar</a>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+        </header>
+
+        <main class="container content-area">
+          {% for note in messages %}
+            <div class="message {{ note.tags }}">{{ note }}</div>
+          {% endfor %}
+          {% block content %}{% endblock %}
+        </main>
+      </div>
+    </div>
+
+    <footer class="site-footer">
+      <div class="container">
+  <p>Impulsa Gestión — &copy; 2025 — Desarrollado por <a href="https://www.bytenco.com.ar" target="_blank" rel="noopener noreferrer">Bytenco</a></p>
+      </div>
+    </footer>
+  </body>
+</html>
