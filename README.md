@@ -28,3 +28,10 @@ python manage.py runserver
 ```
 
 Desarrollado por Bytenco — https://www.bytenco.com.ar
+
+Logos: copia los logos proporcionados por Bytenco a la carpeta `graphics/` del proyecto. Por ejemplo:
+
+```powershell
+# En Windows PowerShell, copia el logo desde tu carpeta de intercambio
+Copy-Item "Z:\Personal intercambio\Bytenco\Bytenco.png" -Destination .\graphics\Bytenco.png
+```
