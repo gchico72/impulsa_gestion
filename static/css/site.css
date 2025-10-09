@@ -69,23 +69,36 @@ body{
 .user-auth{display:inline-flex;align-items:center;gap:8px}
 
 /* Hover and focus effects for icons */
-.notif-icon, .login-icon, .bytenco-logo{
+.notif-icon, .login-icon, .bytenco-logo, .accesso-icon, .logout-icon{
   transition: transform .12s ease, filter .12s ease, opacity .12s ease;
   will-change: transform, filter, opacity;
 }
 .notifications a:hover .notif-icon,
 .notifications a:focus .notif-icon,
-.notifications a:focus-within .notif-icon{
+.notifications a:focus-within .notif-icon,
+.user-menu a:hover .login-icon,
+.user-menu a:focus .login-icon,
+.user-menu a:focus-within .login-icon,
+.user-auth:hover .accesso-icon,
+.user-auth:focus-within .accesso-icon,
+.logout-link:hover .logout-icon,
+.logout-link:focus .logout-icon,
+.logout-link:focus-within .logout-icon{
   transform: scale(1.12);
   filter: brightness(1.15) saturate(1.05);
   cursor: pointer;
 }
-.user-menu a:hover .login-icon,
-.user-menu a:focus .login-icon,
-.user-menu a:focus-within .login-icon{
-  transform: scale(1.12);
-  filter: brightness(1.15) saturate(1.05);
-  cursor: pointer;
+.bytenco-credit:hover .bytenco-logo,
+.bytenco-credit:focus .bytenco-logo{
+  transform: scale(1.05);
+  filter: brightness(1.05);
+}
+
+/* Accessible focus ring for logout link */
+.logout-link:focus{
+  outline: 3px solid rgba(86,195,255,0.18);
+  outline-offset: 4px;
+  border-radius:6px;
 }
 .bytenco-credit:hover .bytenco-logo,
 .bytenco-credit:focus .bytenco-logo{

@@ -80,4 +80,7 @@ STATICFILES_DIRS = [
     BASE_DIR / 'graphics',
 ]
 
+# Redirect unauthenticated users to the admin login by default
+LOGIN_URL = '/admin/login/'
+
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'

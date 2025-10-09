@@ -41,7 +41,7 @@
               <div class="user-menu">
                   {% if user.is_authenticated %}
                     <div class="user-auth">
-                      <img src="{% static 'Accesso_garantizado.png' %}" alt="Acceso garantizado" class="accesso-icon" aria-hidden="true"/>
+                      <img src="{% static 'Acceso_garantizado.png' %}" alt="Acceso garantizado" class="accesso-icon" aria-hidden="true"/>
                       <span class="user-name">{{ user.username }}</span>
                       <a href="/admin/logout/" title="Salir" class="logout-link">
                         <img src="{% static 'Salir.png' %}" alt="Salir" class="logout-icon" />
@@ -49,7 +49,7 @@
                     </div>
                   {% else %}
                     <a href="/admin/login/" title="Ingresar">
-                      <img src="{% static 'Access.png' %}" alt="Ingresar" class="login-icon" />
+                      <img src="{% static 'Accesso.png' %}" alt="Ingresar" class="login-icon" />
                     </a>
                   {% endif %}
                 </div>
