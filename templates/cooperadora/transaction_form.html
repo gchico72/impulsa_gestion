@@ -1,0 +1,11 @@
+{% extends 'base.html' %}
+{% block title %}Transacción — Cooperadora{% endblock %}
+{% block content %}
+  <h2>{% if object %}Editar{% else %}Nueva{% endif %} transacción</h2>
+  <form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button class="btn" type="submit">Guardar</button>
+    <a href="{% url 'cooperadora:transaction_list' %}" class="btn btn--ghost">Cancelar</a>
+  </form>
+{% endblock %}

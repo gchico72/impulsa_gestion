@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+{% block title %}Transacciones — Cooperadora{% endblock %}
+{% block content %}
+<h2>Transacciones</h2>
+<p>
+  {% if perms.cooperadora.add_transaction %}
+    <a class="btn" href="{% url 'cooperadora:transaction_add' %}">Nueva transacción</a>
+  {% endif %}
+</p>
+<table class="table">
+  <thead><tr><th>Fecha</th><th>Tipo</th><th>Monto</th><th>Descripción</th><th>Acciones</th></tr></thead>
+  <tbody>
+    {% for t in transactions %}
+      <tr>
+        <td>{{ t.date }}</td>
+        <td>{{ t.get_type_display }}</td>
+        <td>{{ t.amount }}</td>
+        <td>{{ t.description }}</td>
+        <td>
+          {% if perms.cooperadora.change_transaction %}
+            <a href="{% url 'cooperadora:transaction_edit' t.pk %}">Editar</a>
+          {% endif %}
+          {% if perms.cooperadora.delete_transaction %}
+            &nbsp;|&nbsp;<a href="{% url 'cooperadora:transaction_delete' t.pk %}">Eliminar</a>
+          {% endif %}
+        </td>
+      </tr>
+    {% empty %}
+      <tr><td colspan="5">No hay transacciones.</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

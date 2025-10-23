@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+{% block title %}Proyectos — Cooperadora{% endblock %}
+{% block content %}
+<h2>Proyectos</h2>
+<p>
+  {% if perms.cooperadora.add_cooperadoraproject %}
+    <a class="btn" href="{% url 'cooperadora:project_add' %}">Nuevo proyecto</a>
+  {% endif %}
+</p>
+<ul>
+  {% for p in projects %}
+    <li>
+      <strong>{{ p.title }}</strong> — Presupuesto: {{ p.budget }}
+      {% if perms.cooperadora.change_cooperadoraproject %}
+        &nbsp;<a href="{% url 'cooperadora:project_edit' p.pk %}">Editar</a>
+      {% endif %}
+      {% if perms.cooperadora.delete_cooperadoraproject %}
+        &nbsp;|&nbsp;<a href="{% url 'cooperadora:project_delete' p.pk %}">Eliminar</a>
+      {% endif %}
+      <p>{{ p.description }}</p>
+    </li>
+  {% empty %}
+    <li>No hay proyectos cargados.</li>
+  {% endfor %}
+</ul>
+{% endblock %}

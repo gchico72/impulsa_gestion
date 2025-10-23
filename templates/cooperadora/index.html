@@ -3,4 +3,8 @@
 {% block content %}
 	<h2>Cooperadora</h2>
 	<p>Gestión de ingresos, egresos y proyectos de la cooperadora.</p>
+	<ul>
+		<li><a href="{% url 'cooperadora:transaction_list' %}">Transacciones</a></li>
+		<li><a href="{% url 'cooperadora:transaction_report' %}">Reporte</a></li>
+	</ul>
 {% endblock %}

@@ -1,0 +1,10 @@
+{% extends 'base.html' %}
+{% block title %}Eliminar proyecto — Cooperadora{% endblock %}
+{% block content %}
+  <h2>Eliminar proyecto</h2>
+  <p>¿Confirma que desea eliminar el proyecto <strong>{{ object }}</strong>?</p>
+  <form method="post">{% csrf_token %}
+    <button class="btn" type="submit">Eliminar</button>
+    <a href="{% url 'cooperadora:project_list' %}" class="btn btn--ghost">Cancelar</a>
+  </form>
+{% endblock %}
