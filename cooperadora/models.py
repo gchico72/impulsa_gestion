@@ -75,49 +75,19 @@ class MonthPeriod(models.Model):
         return f"{self.year}-{self.month:02d}"
 
     def close_month(self, user=None):
-        """Close the month: compute net, create carryover transaction in next month and mark closed.
+        """Close this MonthPeriod.
 
-        Behavior:
-        - Sum incomes minus expenses and include adjustments as they are typed (AJ treated like expense or income depending on sign)
-        - Create a carryover Transaction on the first day of next month with type IN or EX to reflect net
-        - Mark this MonthPeriod as closed and set closed_at
+        This method now delegates the closing operation to the service layer
+        (MonthCloser). Keeping orchestration in services makes the behavior
+        easier to test and allows swapping the carryover strategy.
+
+        Args:
+            user: optional user performing the action (reserved for auditing).
+        Returns:
+            dict with keys 'net' and 'carry' when closed, or None if already closed.
         """
-        if self.is_closed:
-            return
+        # Import service locally to avoid circular import at module load.
+        from .services import MonthCloser
 
-        # compute net for the month
-        from django.db.models import Sum
-        qs = Transaction.objects.filter(date__year=self.year, date__month=self.month)
-        income = qs.filter(type=Transaction.INCOME).aggregate(total=Sum('amount'))['total'] or 0
-        expense = qs.filter(type=Transaction.EXPENSE).aggregate(total=Sum('amount'))['total'] or 0
-        adj = qs.filter(type=Transaction.ADJUSTMENT).aggregate(total=Sum('amount'))['total'] or 0
-
-        # define net: incomes - expenses + adjustments
-        net = income - expense + adj
-
-        # determine next month
-        if self.month == 12:
-            ny, nm = self.year + 1, 1
-        else:
-            ny, nm = self.year, self.month + 1
-
-        # create next period record if not exists
-        next_period, _ = MonthPeriod.objects.get_or_create(year=ny, month=nm)
-
-        # create carryover transaction in next period if net != 0
-        if net != 0:
-            # decide type and positive amount
-            if net > 0:
-                ttype = Transaction.INCOME
-                amt = net
-            else:
-                ttype = Transaction.EXPENSE
-                amt = -net
-
-            carry_date = date(ny, nm, 1)
-            Transaction.objects.create(date=carry_date, type=ttype, amount=amt,
-                                       description=f"Saldo trasladado desde {self.year}-{self.month:02d}")
-
-        self.is_closed = True
-        self.closed_at = timezone.now()
-        self.save()
+        closer = MonthCloser(self, user=user)
+        return closer.close()

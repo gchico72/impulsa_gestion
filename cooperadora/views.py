@@ -59,8 +59,12 @@ class CloseMonthView(LoginRequiredMixin, PermissionRequiredMixin, View):
     def post(self, request, year, month):
         mp = get_object_or_404(__import__('cooperadora.models', fromlist=['MonthPeriod']).models.MonthPeriod, year=year, month=month)
         try:
-            mp.close_month(user=request.user)
-            messages.success(request, f'Mes {mp} cerrado correctamente.')
+            # Use the service layer MonthCloser for closing behavior
+            result = services.MonthCloser(mp, user=request.user).close()
+            if result is None:
+                messages.info(request, f'El mes {mp} ya estaba cerrado.')
+            else:
+                messages.success(request, f'Mes {mp} cerrado correctamente. Neto: {result.get("net")}')
         except Exception as e:
             messages.error(request, f'Error cerrando mes: {e}')
         return redirect('cooperadora:index')
