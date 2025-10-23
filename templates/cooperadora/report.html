@@ -23,20 +23,39 @@
 
 <table class="table">
   <thead>
-    <tr><th>Fecha</th><th>Tipo</th><th>Monto</th><th>Descripción</th></tr>
+    <tr>
+      <th>Fecha</th>
+      <th>Tipo</th>
+      <th style="text-align:right">Ingresos</th>
+      <th style="text-align:right">Egresos</th>
+      <th>Descripción</th>
+    </tr>
   </thead>
   <tbody>
-    {% for t in transactions %}
+    {% for r in transactions %}
       <tr>
-        <td>{{ t.date }}</td>
-        <td>{{ t.get_type_display }}</td>
-        <td>{{ t.amount }}</td>
-        <td>{{ t.description }}</td>
+        <td>{{ r.date }}</td>
+        <td>{{ r.type }}</td>
+        <td style="text-align:right">{% if r.income %}{{ r.income|floatformat:2 }}{% else %}&nbsp;{% endif %}</td>
+        <td style="text-align:right">{% if r.expense %}{{ r.expense|floatformat:2 }}{% else %}&nbsp;{% endif %}</td>
+        <td>{{ r.description }}</td>
       </tr>
     {% empty %}
-      <tr><td colspan="4">No hay transacciones para el rango seleccionado.</td></tr>
+      <tr><td colspan="5">No hay transacciones para el rango seleccionado.</td></tr>
     {% endfor %}
   </tbody>
+  <tfoot>
+    <tr>
+      <td colspan="2" style="text-align:right"><strong>Totales:</strong></td>
+      <td style="text-align:right"><strong>{{ total_income|floatformat:2 }}</strong></td>
+      <td style="text-align:right"><strong>{{ total_expense|floatformat:2 }}</strong></td>
+      <td></td>
+    </tr>
+    <tr>
+      <td colspan="2" style="text-align:right"><strong>Total general:</strong></td>
+      <td style="text-align:right" colspan="3"><strong>{{ total_general|floatformat:2 }}</strong></td>
+    </tr>
+  </tfoot>
 </table>
 
 {% endblock %}

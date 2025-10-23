@@ -4,6 +4,8 @@ from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMix
 from django.views.generic import ListView, CreateView, UpdateView, DeleteView
 
 from .models import Transaction
+from .forms import TransactionForm
+from . import services
 
 
 def index(request):
@@ -16,18 +18,70 @@ class TransactionListView(LoginRequiredMixin, PermissionRequiredMixin, ListView)
     context_object_name = 'transactions'
     permission_required = 'cooperadora.view_transaction'
 
+    def get_context_data(self, **kwargs):
+        """Add income/expense split and totals to the context."""
+        ctx = super().get_context_data(**kwargs)
+        qs = self.get_queryset().order_by('date')
+        from decimal import Decimal
+
+        rows = []
+        total_income = Decimal('0')
+        total_expense = Decimal('0')
+        for t in qs:
+            amt = t.amount
+            income_col = None
+            expense_col = None
+            if t.type == Transaction.INCOME:
+                income_col = amt
+                total_income += Decimal(amt)
+            elif t.type == Transaction.EXPENSE:
+                expense_col = -Decimal(amt)
+                total_expense += -Decimal(amt)
+            else:  # ADJUSTMENT
+                if amt >= 0:
+                    income_col = amt
+                    total_income += Decimal(amt)
+                else:
+                    expense_col = Decimal(amt)
+                    total_expense += Decimal(amt)
+
+            rows.append({
+                'pk': t.pk,
+                'date': t.date,
+                'type': t.get_type_display(),
+                'income': income_col,
+                'expense': expense_col,
+                'description': t.description or '',
+            })
+
+        total_general = total_income + total_expense
+        ctx.update({
+            'rows': rows,
+            'total_income': total_income,
+            'total_expense': total_expense,
+            'total_general': total_general,
+        })
+        return ctx
+
 
 class TransactionCreateView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
     model = Transaction
-    fields = ['date', 'type', 'amount', 'description']
+    form_class = TransactionForm
     template_name = 'cooperadora/transaction_form.html'
     success_url = reverse_lazy('cooperadora:transaction_list')
     permission_required = 'cooperadora.add_transaction'
 
+    def get_initial(self):
+        """Provide initial data for the form (default date = today)."""
+        initial = super().get_initial()
+        # TransactionForm already sets today as default, but keep here to be explicit
+        from datetime import date
+        initial.setdefault('date', date.today())
+        return initial
 
 class TransactionUpdateView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
     model = Transaction
-    fields = ['date', 'type', 'amount', 'description']
+    form_class = TransactionForm
     template_name = 'cooperadora/transaction_form.html'
     success_url = reverse_lazy('cooperadora:transaction_list')
     permission_required = 'cooperadora.change_transaction'
@@ -73,6 +127,7 @@ class CloseMonthView(LoginRequiredMixin, PermissionRequiredMixin, View):
 from django.http import HttpResponse
 import csv
 from django.utils.dateparse import parse_date
+from decimal import Decimal
 
 
 class TransactionReportView(LoginRequiredMixin, PermissionRequiredMixin, View):
@@ -101,14 +156,68 @@ class TransactionReportView(LoginRequiredMixin, PermissionRequiredMixin, View):
             else:
                 qs = qs.filter(date__lte=h)
 
-        # If CSV requested, stream it
+        # Build rows with separate income/expense columns
+        rows = []
+        total_income = Decimal('0')
+        total_expense = Decimal('0')
+        for t in qs:
+            amt = t.amount
+            income_col = None
+            expense_col = None
+            # Ingresos: type IN always positive
+            if t.type == Transaction.INCOME:
+                income_col = amt
+                total_income += Decimal(amt)
+            # Egresos: type EX shown as negative value in expense column
+            elif t.type == Transaction.EXPENSE:
+                expense_col = -Decimal(amt)
+                total_expense += -Decimal(amt)
+            # Ajustes: place according to sign
+            else:  # ADJUSTMENT
+                if amt >= 0:
+                    income_col = amt
+                    total_income += Decimal(amt)
+                else:
+                    expense_col = Decimal(amt)  # amt is negative
+                    total_expense += Decimal(amt)
+
+            rows.append({
+                'date': t.date,
+                'type': t.get_type_display(),
+                'income': income_col,
+                'expense': expense_col,
+                'description': t.description or '',
+            })
+
+        # Net total (ingresos + egresos where egresos are negative)
+        total_general = total_income + total_expense
+
+        # If CSV requested, stream it with separate columns
         if fmt == 'csv' and not errors:
             resp = HttpResponse(content_type='text/csv')
             resp['Content-Disposition'] = 'attachment; filename="cooperadora_report.csv"'
             writer = csv.writer(resp)
-            writer.writerow(['date', 'type', 'amount', 'description'])
-            for t in qs:
-                writer.writerow([t.date.isoformat(), t.get_type_display(), str(t.amount), t.description or ''])
+            writer.writerow(['date', 'type', 'income', 'expense', 'description'])
+            for r in rows:
+                writer.writerow([
+                    r['date'].isoformat(),
+                    r['type'],
+                    str(r['income']) if r['income'] is not None else '',
+                    str(r['expense']) if r['expense'] is not None else '',
+                    r['description'],
+                ])
+            # Totals row
+            writer.writerow([])
+            writer.writerow(['Totales', '', str(total_income), str(total_expense), ''])
+            writer.writerow(['Total general', '', str(total_general), '', ''])
             return resp
 
-        return render(request, 'cooperadora/report.html', {'transactions': qs, 'errors': errors, 'desde': desde or '', 'hasta': hasta or ''})
+        return render(request, 'cooperadora/report.html', {
+            'transactions': rows,
+            'errors': errors,
+            'desde': desde or '',
+            'hasta': hasta or '',
+            'total_income': total_income,
+            'total_expense': total_expense,
+            'total_general': total_general,
+        })
