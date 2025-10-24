@@ -28,14 +28,14 @@ class Transaction(models.Model):
         return f"{self.get_type_display()} {self.amount} on {self.date}"
 
     def get_month_period(self):
-        """Return Year, Month tuple for this transaction's date."""
+        """Devolver una tupla (año, mes) para la fecha de esta transacción."""
         return (self.date.year, self.date.month)
 
     def save(self, *args, **kwargs):
-        # Prevent modifying transactions when their month is closed
+    # Evitar modificar transacciones cuando su mes esté cerrado
         from .models import MonthPeriod  # local import
         if self.pk:
-            # existing transaction, check if period closed
+            # transacción existente: comprobar si el periodo está cerrado
             yr, m = self.get_month_period()
             try:
                 mp = MonthPeriod.objects.filter(year=yr, month=m).first()
@@ -44,7 +44,7 @@ class Transaction(models.Model):
             except ValidationError:
                 raise
             except Exception:
-                # ignore lookup errors
+                # ignorar errores de consulta
                 pass
         super().save(*args, **kwargs)
 
@@ -58,7 +58,7 @@ class Transaction(models.Model):
 
 
 class MonthPeriod(models.Model):
-    """Represents a specific month/year and whether it's closed."""
+    """Representa un mes/año específico y si está cerrado."""
     year = models.PositiveIntegerField()
     month = models.PositiveIntegerField()
     is_closed = models.BooleanField(default=False)
@@ -75,16 +75,16 @@ class MonthPeriod(models.Model):
         return f"{self.year}-{self.month:02d}"
 
     def close_month(self, user=None):
-        """Close this MonthPeriod.
+        """Cerrar este MonthPeriod.
 
-        This method now delegates the closing operation to the service layer
-        (MonthCloser). Keeping orchestration in services makes the behavior
-        easier to test and allows swapping the carryover strategy.
+        Este método delega ahora la operación de cierre a la capa de servicios
+        (MonthCloser). Mantener la orquestación en servicios facilita las pruebas
+        y permite cambiar la estrategia de traslado de saldos (carryover).
 
         Args:
-            user: optional user performing the action (reserved for auditing).
+            user: usuario opcional que realiza la acción (reservado para auditoría).
         Returns:
-            dict with keys 'net' and 'carry' when closed, or None if already closed.
+            dict con llaves 'net' y 'carry' cuando se cierra, o None si ya estaba cerrado.
         """
         # Import service locally to avoid circular import at module load.
         from .services import MonthCloser

@@ -21,6 +21,7 @@ def user_context(request):
         # user groups
         try:
             user_groups = [g.name for g in user.groups.all()]
+            # grupos del usuario
         except Exception:
             user_groups = []
         # permissions as 'app_label.codename'

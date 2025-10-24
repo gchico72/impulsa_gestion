@@ -2,7 +2,7 @@ import os
 import sys
 import traceback
 
-# Ensure project root is on sys.path
+# Asegurar que la raíz del proyecto esté en sys.path
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 if ROOT not in sys.path:
     sys.path.insert(0, ROOT)

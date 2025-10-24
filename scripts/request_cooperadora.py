@@ -25,7 +25,7 @@ if __name__ == '__main__':
     django.setup()
     from django.contrib.auth import get_user_model
     User = get_user_model()
-    # Create or get a test user
+    # Crear u obtener un usuario de prueba
     user, created = User.objects.get_or_create(username='testuser', defaults={'email': 'test@local'})
     if created:
         user.set_password('password')
@@ -33,7 +33,7 @@ if __name__ == '__main__':
         user.save()
 
     client = Client()
-    # Prefer force_login to avoid dealing with password hashing differences
+    # Usar force_login para evitar lidiar con hashing de contraseñas
     client.force_login(user)
 
     do_request('/cooperadora/transactions/', client)
@@ -41,7 +41,7 @@ if __name__ == '__main__':
     do_request('/cooperadora/report/', client)
     print('\n---\n')
     do_request('/cooperadora/transactions/add/', client)
-    # Quick verification: check if the response contains radio inputs for the 'type'
+    # Verificación rápida: comprobar si la respuesta contiene inputs radio para 'type'
     r = client.get('/cooperadora/transactions/add/', HTTP_HOST='127.0.0.1')
     body = r.content.decode('utf-8', 'ignore')
     print('\nRadio inputs present? ->', 'type="radio"' in body)

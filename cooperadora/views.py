@@ -19,7 +19,7 @@ class TransactionListView(LoginRequiredMixin, PermissionRequiredMixin, ListView)
     permission_required = 'cooperadora.view_transaction'
 
     def get_context_data(self, **kwargs):
-        """Add income/expense split and totals to the context."""
+        """Agregar al contexto la separación de ingresos/egresos y los totales."""
         ctx = super().get_context_data(**kwargs)
         qs = self.get_queryset().order_by('date')
         from decimal import Decimal
@@ -72,9 +72,9 @@ class TransactionCreateView(LoginRequiredMixin, PermissionRequiredMixin, CreateV
     permission_required = 'cooperadora.add_transaction'
 
     def get_initial(self):
-        """Provide initial data for the form (default date = today)."""
+        """Proveer datos iniciales para el formulario (fecha por defecto = hoy)."""
         initial = super().get_initial()
-        # TransactionForm already sets today as default, but keep here to be explicit
+    # TransactionForm ya establece hoy como valor por defecto, pero lo dejamos explícito
         from datetime import date
         initial.setdefault('date', date.today())
         return initial
@@ -106,14 +106,14 @@ class CloseMonthView(LoginRequiredMixin, PermissionRequiredMixin, View):
     permission_required = 'cooperadora.close_month'
 
     def get(self, request, year, month):
-        # show confirmation
+        # mostrar confirmación
         mp = get_object_or_404(__import__('cooperadora.models', fromlist=['MonthPeriod']).models.MonthPeriod, year=year, month=month)
         return render(request, 'cooperadora/close_month_confirm.html', {'period': mp})
 
     def post(self, request, year, month):
         mp = get_object_or_404(__import__('cooperadora.models', fromlist=['MonthPeriod']).models.MonthPeriod, year=year, month=month)
         try:
-            # Use the service layer MonthCloser for closing behavior
+            # Usar la capa de servicios MonthCloser para el comportamiento de cierre
             result = services.MonthCloser(mp, user=request.user).close()
             if result is None:
                 messages.info(request, f'El mes {mp} ya estaba cerrado.')
@@ -131,11 +131,11 @@ from decimal import Decimal
 
 
 class TransactionReportView(LoginRequiredMixin, PermissionRequiredMixin, View):
-    """Report transactions between two dates (inclusive). Supports CSV export via ?format=csv."""
+    """Reporte de transacciones entre dos fechas (inclusivas). Soporta exportar CSV con ?format=csv."""
     permission_required = 'cooperadora.view_transaction'
 
     def get(self, request):
-        # read optional query params
+        # leer parámetros de consulta opcionales
         desde = request.GET.get('desde')
         hasta = request.GET.get('hasta')
         fmt = request.GET.get('format')
@@ -156,7 +156,7 @@ class TransactionReportView(LoginRequiredMixin, PermissionRequiredMixin, View):
             else:
                 qs = qs.filter(date__lte=h)
 
-        # Build rows with separate income/expense columns
+    # Construir filas con columnas separadas para ingreso/egreso
         rows = []
         total_income = Decimal('0')
         total_expense = Decimal('0')
@@ -189,10 +189,10 @@ class TransactionReportView(LoginRequiredMixin, PermissionRequiredMixin, View):
                 'description': t.description or '',
             })
 
-        # Net total (ingresos + egresos where egresos are negative)
+    # Total neto (ingresos + egresos, donde los egresos están como negativos)
         total_general = total_income + total_expense
 
-        # If CSV requested, stream it with separate columns
+    # Si se solicita CSV, enviarlo en streaming con columnas separadas
         if fmt == 'csv' and not errors:
             resp = HttpResponse(content_type='text/csv')
             resp['Content-Disposition'] = 'attachment; filename="cooperadora_report.csv"'
@@ -206,7 +206,7 @@ class TransactionReportView(LoginRequiredMixin, PermissionRequiredMixin, View):
                     str(r['expense']) if r['expense'] is not None else '',
                     r['description'],
                 ])
-            # Totals row
+            # Fila de totales
             writer.writerow([])
             writer.writerow(['Totales', '', str(total_income), str(total_expense), ''])
             writer.writerow(['Total general', '', str(total_general), '', ''])

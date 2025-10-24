@@ -4,10 +4,10 @@ from datetime import date
 
 
 class TransactionForm(forms.ModelForm):
-    """Form for Transaction with Spanish labels and a date picker widget.
+    """Formulario para Transaction con etiquetas en español y selector de fecha.
 
-    - Sets field labels in Spanish.
-    - Uses HTML5 date input for better UX in modern browsers.
+    - Establece las etiquetas de los campos en español.
+    - Usa el input HTML5 de tipo date para mejor UX en navegadores modernos.
     """
 
     class Meta:
@@ -21,21 +21,21 @@ class TransactionForm(forms.ModelForm):
         }
         widgets = {
             'date': forms.DateInput(attrs={'type': 'date'}),
-            # Render the transaction type as radio buttons (only one selectable)
+            # Renderizar el tipo de transacción como botones de opción (solo uno seleccionable)
             'type': forms.RadioSelect(),
             'amount': forms.NumberInput(attrs={'step': '0.01'}),
             'description': forms.Textarea(attrs={'rows': 3}),
         }
 
     def __init__(self, *args, **kwargs):
-        # If no initial date provided, default to today for convenience
+        # Si no se provee fecha inicial, usar hoy por conveniencia
         if 'initial' not in kwargs:
             kwargs['initial'] = {}
         kwargs['initial'].setdefault('date', date.today())
         super().__init__(*args, **kwargs)
-        # Only present the two core transaction types to the user (Ingreso/Egreso).
-        # The model still keeps the ADJUSTMENT choice for internal operations, but
-        # the form should limit the user to IN/EX options and render them as radios.
+        # Mostrar solo los dos tipos principales al usuario (Ingreso/Egreso).
+        # El modelo mantiene la opción AJ para usos internos, pero el formulario
+        # debe limitar al usuario a IN/EX y presentarlos como radios.
         try:
             from .models import Transaction as T
             self.fields['type'].choices = [
@@ -43,5 +43,5 @@ class TransactionForm(forms.ModelForm):
                 (T.EXPENSE, T.TYPE_CHOICES[1][1]),
             ]
         except Exception:
-            # If anything goes wrong, fall back to whatever the model provides.
+            # Si algo falla, volver al comportamiento por defecto del modelo.
             pass

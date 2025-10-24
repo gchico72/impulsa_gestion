@@ -1,12 +1,12 @@
-"""Service layer for cooperadora domain logic.
+"""Capa de servicios para la lógica de dominio de cooperadora.
 
-This module provides:
-- TransactionFactory: centralized creation of Transaction objects (factory pattern).
-- CarryoverStrategy: strategy for creating carryover transactions when closing a period.
-- MonthCloser: orchestrator that computes the period net and applies the carryover strategy
-  (strategy pattern + service class).
+Este módulo provee:
+- TransactionFactory: creación centralizada de objetos Transaction (patrón factory).
+- CarryoverStrategy: estrategia para crear transacciones de traslado al cerrar un periodo.
+- MonthCloser: orquestador que calcula el neto del periodo y aplica la estrategia de traslado
+    (patrón strategy + clase de servicio).
 
-Placing this logic in a separate module improves testability and keeps models thin.
+Colocar esta lógica en un módulo separado mejora la testeabilidad y mantiene los modelos ligeros.
 """
 from datetime import date
 from django.utils import timezone
@@ -15,10 +15,10 @@ from django.db.models import Sum
 
 
 class TransactionFactory:
-    """Factory for creating Transaction instances.
+    """Fábrica para crear instancias de Transaction.
 
-    Use this factory so creation is centralized (single place to change behavior,
-    add logging, auditing, or other side effects).
+    Usar esta fábrica centraliza la creación (un único lugar para cambiar el
+    comportamiento, agregar logging, auditoría u otros efectos secundarios).
     """
 
     @staticmethod
@@ -28,32 +28,32 @@ class TransactionFactory:
 
 
 class CarryoverStrategy:
-    """Default carryover strategy.
+    """Estrategia por defecto para el traslado de saldos.
 
-    When a month is closed this strategy will create a carryover transaction
-    on the first day of the next month. Positive net -> IN, negative net -> EX.
+    Cuando se cierra un mes, esta estrategia crea una transacción de traslado
+    el primer día del mes siguiente. Neto positivo -> IN, neto negativo -> EX.
     """
 
     def create_carryover(self, year, month, net):
-        """Create a carryover transaction for next month based on net amount.
+        """Crear una transacción de traslado para el mes siguiente basada en el neto.
 
         Args:
-            year (int): year of closed period
-            month (int): month of closed period (1-12)
-            net (Decimal): net amount (income - expense + adjustments)
+            year (int): año del periodo cerrado
+            month (int): mes del periodo cerrado (1-12)
+            net (Decimal): monto neto (ingresos - egresos + ajustes)
         Returns:
-            Transaction instance or None if net == 0
+            instancia de Transaction o None si net == 0
         """
         if net == 0:
             return None
 
-        # Determine next month/year
+        # Determinar mes/año siguiente
         if month == 12:
             ny, nm = year + 1, 1
         else:
             ny, nm = year, month + 1
 
-        TransactionFactory = TransactionFactory  # local name clarity
+        TransactionFactory = TransactionFactory  # nombre local por claridad
         if net > 0:
             ttype = apps.get_model('cooperadora', 'Transaction').INCOME
             amt = net
@@ -66,11 +66,11 @@ class CarryoverStrategy:
 
 
 class MonthCloser:
-    """Service to close a month period.
+    """Servicio para cerrar un periodo mensual.
 
-    This class encapsulates the steps of computing the net for a month, invoking
-    a carryover strategy if needed and marking the MonthPeriod as closed.
-    It uses apps.get_model to avoid circular imports from models -> services -> models.
+    Esta clase encapsula los pasos de calcular el neto de un mes, invocar
+    una estrategia de traslado si es necesario y marcar el MonthPeriod como cerrado.
+    Usa apps.get_model para evitar importaciones circulares entre modelos y servicios.
     """
 
     def __init__(self, month_period, user=None, carryover_strategy=None):
@@ -79,7 +79,7 @@ class MonthCloser:
         self.strategy = carryover_strategy or CarryoverStrategy()
 
     def compute_net(self):
-        """Compute net = total incomes - total expenses + total adjustments for the period."""
+        """Calcular net = total ingresos - total egresos + total ajustes para el periodo."""
         Transaction = apps.get_model('cooperadora', 'Transaction')
         qs = Transaction.objects.filter(date__year=self.month_period.year, date__month=self.month_period.month)
         income = qs.filter(type=Transaction.INCOME).aggregate(total=Sum('amount'))['total'] or 0
@@ -88,13 +88,13 @@ class MonthCloser:
         return income - expense + adj
 
     def close(self):
-        """Perform closing: compute net, create carryover (if required) and mark closed."""
+        """Realizar el cierre: calcular neto, crear traslado (si corresponde) y marcar como cerrado."""
         if self.month_period.is_closed:
             return None
 
         net = self.compute_net()
 
-        # Ensure next period exists (create if missing)
+    # Asegurar que exista el siguiente periodo (crear si falta)
         MonthPeriod = apps.get_model('cooperadora', 'MonthPeriod')
         if self.month_period.month == 12:
             ny, nm = self.month_period.year + 1, 1
@@ -103,7 +103,7 @@ class MonthCloser:
 
         MonthPeriod.objects.get_or_create(year=ny, month=nm)
 
-        # Create carryover using strategy
+    # Crear traslado usando la estrategia
         carry = None
         if net != 0:
             carry = self.strategy.create_carryover(self.month_period.year, self.month_period.month, net)

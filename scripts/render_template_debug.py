@@ -9,7 +9,7 @@ try:
     django.setup()
     from django.template import loader
     t = loader.get_template('cooperadora/transaction_list.html')
-    print('Got template OK, now render...')
+    print('Template cargada OK, ahora renderizo...')
     print(t.render({}))
 except Exception:
     traceback.print_exc()

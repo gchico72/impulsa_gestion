@@ -16,7 +16,7 @@ from cooperadora.models import Transaction, MonthPeriod
 
 
 def random_date(start_date, end_date):
-    """Return a random date between start_date and end_date inclusive."""
+    """Devolver una fecha aleatoria entre start_date y end_date inclusive."""
     delta = (end_date - start_date).days
     if delta <= 0:
         return start_date
@@ -47,10 +47,10 @@ def main(n=50, min_amt=1000, max_amt=50000):
     total_income = sum([t.amount for t in created if t.type == Transaction.INCOME])
     total_expense = sum([t.amount for t in created if t.type == Transaction.EXPENSE])
 
-    print(f"Created {len(created)} transactions (from {start} to {end}).")
-    print(f"Income count: {len([t for t in created if t.type=='IN'])}, Expense count: {len([t for t in created if t.type=='EX'])}")
-    print(f"Total income: {total_income}")
-    print(f"Total expense: {total_expense}")
+    print(f"Creadas {len(created)} transacciones (desde {start} hasta {end}).")
+    print(f"Cantidad ingresos: {len([t for t in created if t.type=='IN'])}, Cantidad egresos: {len([t for t in created if t.type=='EX'])}")
+    print(f"Total ingresos: {total_income}")
+    print(f"Total egresos: {total_expense}")
 
 
 if __name__ == '__main__':
