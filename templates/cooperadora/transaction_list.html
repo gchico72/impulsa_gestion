@@ -2,6 +2,7 @@
 {% block title %}Transacciones — Cooperadora{% endblock %}
 {% block content %}
 <h2>Transacciones</h2>
+{% load money_filters %}
 <p>
   {% if perms.cooperadora.add_transaction %}
     <a class="btn" href="{% url 'cooperadora:transaction_add' %}">Nueva transacción</a>
@@ -23,8 +24,8 @@
       <tr>
         <td>{{ r.date }}</td>
         <td>{{ r.type }}</td>
-        <td style="text-align:right">{% if r.income %}{{ r.income|floatformat:2 }}{% else %}&nbsp;{% endif %}</td>
-        <td style="text-align:right">{% if r.expense %}{{ r.expense|floatformat:2 }}{% else %}&nbsp;{% endif %}</td>
+  <td style="text-align:right">{% if r.income %}{{ r.income|money }}{% else %}&nbsp;{% endif %}</td>
+  <td style="text-align:right">{% if r.expense %}{{ r.expense|money }}{% else %}&nbsp;{% endif %}</td>
         <td>{{ r.description }}</td>
         <td>
           {% if perms.cooperadora.change_transaction %}
@@ -42,17 +43,17 @@
   <tfoot>
     <tr>
       <td colspan="2" style="text-align:right"><strong>Totales:</strong></td>
-      <td style="text-align:right"><strong>{{ total_income|floatformat:2 }}</strong></td>
-      <td style="text-align:right"><strong>{{ total_expense|floatformat:2 }}</strong></td>
+  <td style="text-align:right"><strong>{{ total_income|money }}</strong></td>
+  <td style="text-align:right"><strong>{{ total_expense|money }}</strong></td>
       <td colspan="2"></td>
     </tr>
     <tr>
       <td colspan="2" style="text-align:right"><strong>Total general:</strong></td>
       <td colspan="4" style="text-align:right">
         {% if total_general < 0 %}
-          <strong style="color:red">{{ total_general|floatformat:2 }}</strong>
+          <strong style="color:red">{{ total_general|money }}</strong>
         {% else %}
-          <strong>{{ total_general|floatformat:2 }}</strong>
+          <strong>{{ total_general|money }}</strong>
         {% endif %}
       </td>
     </tr>

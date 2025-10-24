@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% block title %}Reporte — Cooperadora{% endblock %}
+{% load money_filters %}
 {% block content %}
 <h2>Reporte de Movimientos</h2>
 
@@ -36,8 +37,8 @@
       <tr>
         <td>{{ r.date }}</td>
         <td>{{ r.type }}</td>
-        <td style="text-align:right">{% if r.income %}{{ r.income|floatformat:2 }}{% else %}&nbsp;{% endif %}</td>
-        <td style="text-align:right">{% if r.expense %}{{ r.expense|floatformat:2 }}{% else %}&nbsp;{% endif %}</td>
+  <td style="text-align:right">{% if r.income %}{{ r.income|money }}{% else %}&nbsp;{% endif %}</td>
+  <td style="text-align:right">{% if r.expense %}{{ r.expense|money }}{% else %}&nbsp;{% endif %}</td>
         <td>{{ r.description }}</td>
       </tr>
     {% empty %}
@@ -47,13 +48,13 @@
   <tfoot>
     <tr>
       <td colspan="2" style="text-align:right"><strong>Totales:</strong></td>
-      <td style="text-align:right"><strong>{{ total_income|floatformat:2 }}</strong></td>
-      <td style="text-align:right"><strong>{{ total_expense|floatformat:2 }}</strong></td>
+  <td style="text-align:right"><strong>{{ total_income|money }}</strong></td>
+  <td style="text-align:right"><strong>{{ total_expense|money }}</strong></td>
       <td></td>
     </tr>
     <tr>
       <td colspan="2" style="text-align:right"><strong>Total general:</strong></td>
-      <td style="text-align:right" colspan="3"><strong>{{ total_general|floatformat:2 }}</strong></td>
+  <td style="text-align:right" colspan="3"><strong>{% if total_general < 0 %}<span style="color:red">{{ total_general|money }}</span>{% else %}{{ total_general|money }}{% endif %}</strong></td>
     </tr>
   </tfoot>
 </table>

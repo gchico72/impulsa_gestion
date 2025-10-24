@@ -10,6 +10,16 @@ class CooperadoraConfig(AppConfig):
         # Create default groups and assign permissions after migrations
         from django.db.models.signals import post_migrate
         post_migrate.connect(create_cooperadora_groups, sender=self)
+        # Ensure our templatetags get imported at startup so Django registers the tag library.
+        # This prevents "not a registered tag library" errors in environments where
+        # the templatetags module wasn't discovered by the template system (for
+        # example when files were added while the server was running).
+        try:
+            import cooperadora.templatetags.money_filters  # noqa: F401
+        except Exception:
+            # Don't raise during startup; the template system will still try to import
+            # when rendering, and tests/debug scripts can surface import errors.
+            pass
 
 
 def create_cooperadora_groups(sender, **kwargs):
