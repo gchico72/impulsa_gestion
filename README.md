@@ -8,7 +8,7 @@ Apps incluidas:
 - courses: gestión de cursos
 - teachers: gestión de docentes y asistencia
 - projects: proyectos multidisciplinarios
-- cooperadora: gestión de la cooperadora (ingresos/egresos/proyectos)
+- cooperadora: gestión de la cooperadora (ingresos/egresos)
 
 Instrucciones rápidas:
 
