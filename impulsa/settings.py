@@ -83,4 +83,8 @@ STATICFILES_DIRS = [
 # Redirect unauthenticated users to the site login page by default
 LOGIN_URL = '/login/'
 
+# Donde redirigir tras login exitoso (evita redirect por defecto a /accounts/profile/)
+# Usar la home del sitio por defecto
+LOGIN_REDIRECT_URL = '/'
+
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
