@@ -37,7 +37,8 @@ class MonthCloser:
         self.strategy = carryover_strategy or CarryoverStrategy()
 
 
-El MonthCloser puede recibir diferentes implementaciones de la estrategia de traslado a través de su constructor, lo que permite cambiar fácilmente cómo se manejan los saldos entre períodos sin modificar el código del MonthCloser.
+El MonthCloser puede recibir diferentes implementaciones de la estrategia de traslado a través de su constructor, 
+lo que permite cambiar fácilmente cómo se manejan los saldos entre períodos sin modificar el código del MonthCloser.
 
 
 
