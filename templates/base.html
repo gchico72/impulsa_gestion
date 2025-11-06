@@ -5,7 +5,8 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{% block title %}Impulsa Gestión{% endblock %}</title>
-    <link rel="stylesheet" href="{% static 'css/site.css' %}">
+  <!-- Cache-busting query param to force reload when styles change during development -->
+  <link rel="stylesheet" href="{% static 'css/site.css' %}?v=2">
   </head>
   <body>
     <div class="layout">

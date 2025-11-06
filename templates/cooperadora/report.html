@@ -22,7 +22,8 @@
   </div>
 {% endif %}
 
-<table class="table">
+<div class="table-wrapper">
+  <table class="table">
   <thead>
     <tr>
       <th>Fecha</th>
@@ -57,6 +58,7 @@
   <td style="text-align:right" colspan="3"><strong>{% if total_general < 0 %}<span style="color:red">{{ total_general|money }}</span>{% else %}{{ total_general|money }}{% endif %}</strong></td>
     </tr>
   </tfoot>
-</table>
+  </table>
+</div>
 
 {% endblock %}
