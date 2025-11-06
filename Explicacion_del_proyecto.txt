@@ -1,0 +1,138 @@
+¿Donde se aplicaron los conceptos aprendidos en la diplo?
+
+Factory y strategy
+
+Los patrones Factory y Strategy están implementados en el módulo services.py. Específicamente:
+
+Factory Pattern: TransactionFactory en services.py
+
+class TransactionFactory:
+    """Fábrica para crear instancias de Transaction."""
+    @staticmethod
+    def create(date_, ttype, amount, description=None):
+        Transaction = apps.get_model('cooperadora', 'Transaction')
+        return Transaction.objects.create(date=date_, type=ttype, amount=amount, description=description or '')
+
+
+
+Este factory centraliza la creación de transacciones en un único lugar.
+
+
+Strategy Pattern: CarryoverStrategy también en services.py
+
+class CarryoverStrategy:
+    """Estrategia por defecto para el traslado de saldos."""
+    def create_carryover(self, year, month, net):
+        """Crear una transacción de traslado para el mes siguiente basada en el neto."""
+        # ... lógica de implementación
+
+
+La estrategia es utilizada por MonthCloser, que actúa como contexto del patrón Strategy:
+
+
+class MonthCloser:
+    def __init__(self, month_period, user=None, carryover_strategy=None):
+        self.month_period = month_period
+        self.user = user
+        self.strategy = carryover_strategy or CarryoverStrategy()
+
+
+El MonthCloser puede recibir diferentes implementaciones de la estrategia de traslado a través de su constructor, lo que permite cambiar fácilmente cómo se manejan los saldos entre períodos sin modificar el código del MonthCloser.
+
+
+
+
+Polimorfismo y Herencia:
+
+
+Uso de herencia en las vistas que heredan de clases base de Django:
+
+class TransactionListView(LoginRequiredMixin, PermissionRequiredMixin, ListView)
+class TransactionCreateView(LoginRequiredMixin, PermissionRequiredMixin, CreateView)
+class TransactionUpdateView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView)
+class TransactionDeleteView(LoginRequiredMixin, PermissionRequiredMixin, DeleteView)
+
+Los modelos heredan de models.Model:
+
+class Transaction(models.Model)
+class MonthPeriod(models.Model)
+
+
+Clases y POO:
+Encapsulamiento de datos y comportamiento en clases
+Clases bien definidas con responsabilidades únicas:
+Transaction: Manejo de transacciones monetarias
+MonthPeriod: Gestión de períodos mensuales
+TransactionFactory: Creación de transacciones
+CarryoverStrategy: Estrategia de traslado de saldos
+MonthCloser: Orquestación del cierre de períodos
+
+
+
+Persistencia (Django ORM):
+Uso del ORM de Django para manejar la base de datos
+Definición de modelos con campos específicos:
+
+
+class Transaction(models.Model):
+    date = models.DateField()
+    type = models.CharField(max_length=2, choices=TYPE_CHOICES)
+    amount = models.DecimalField(max_digits=12, decimal_places=2)
+
+
+Consultas usando el API de Django:
+
+Transaction.objects.filter(...)
+MonthPeriod.objects.get_or_create(...)
+
+
+Sistema de Templates (Render):
+Uso del sistema de templates de Django con herencia:
+
+
+templates/
+    base.html
+    cooperadora/
+        transaction_list.html
+        transaction_form.html
+
+
+Template tags personalizados (money_filters.py)
+Context processors para datos compartidos
+
+Características de Python:
+Type hints y docstrings para documentación
+Decoradores (@staticmethod)
+List comprehensions y diccionarios
+F-strings para formateo de strings
+Manejo de excepciones try/except
+
+Características de Django:
+Class Based Views (CBVs)
+Forms y ModelForms para manejo de formularios
+Sistema de permisos y autenticación
+Signals para eventos del sistema
+URLs y routing
+
+Arquitectura:
+Separación en apps Django (cooperadora, core, etc)
+Patrón MTV (Model-Template-View)
+Capa de servicios para lógica de negocio
+Patrones de diseño (Factory, Strategy)
+
+Buenas Prácticas:
+DRY (Don't Repeat Yourself)
+Single Responsibility Principle
+Dependency Injection (strategy pattern)
+Loose coupling (uso de apps.get_model)
+Código documentado y comentado
+Validaciones de datos
+Control de acceso basado en permisos
+
+Manejo de Datos:
+Decimal para valores monetarios
+Fechas y períodos
+Validaciones de datos
+Cálculos y reportes
+
+
