@@ -21,29 +21,52 @@ class TransactionListView(LoginRequiredMixin, PermissionRequiredMixin, ListView)
     def get_context_data(self, **kwargs):
         """Agregar al contexto la separación de ingresos/egresos y los totales."""
         ctx = super().get_context_data(**kwargs)
-        qs = self.get_queryset().order_by('date')
+        # Mostrar transacciones de la más reciente a la más antigua
+        qs = self.get_queryset().order_by('-date')
+        # Si no se pasa ?all=1, limitar la vista a 10 registros
+        show_all = self.request.GET.get('all') == '1'
+        total_count = qs.count()
+        if not show_all:
+            limited = total_count > 10
+            limited_qs = qs[:10]
+        else:
+            limited = False
+            limited_qs = qs
         from decimal import Decimal
 
-        rows = []
+        # Calcular totales usando el conjunto completo (filtrado) para que los totales
+        # reflejen todos los movimientos, incluso cuando la vista está limitada.
         total_income = Decimal('0')
         total_expense = Decimal('0')
         for t in qs:
+            amt = t.amount
+            if t.type == Transaction.INCOME:
+                total_income += Decimal(amt)
+            elif t.type == Transaction.EXPENSE:
+                total_expense += -Decimal(amt)
+            else:  # ADJUSTMENT
+                if amt >= 0:
+                    total_income += Decimal(amt)
+                else:
+                    total_expense += Decimal(amt)
+
+        total_general = total_income + total_expense
+
+        # Construir filas solo para la vista (limitada o no)
+        rows = []
+        for t in limited_qs:
             amt = t.amount
             income_col = None
             expense_col = None
             if t.type == Transaction.INCOME:
                 income_col = amt
-                total_income += Decimal(amt)
             elif t.type == Transaction.EXPENSE:
                 expense_col = -Decimal(amt)
-                total_expense += -Decimal(amt)
-            else:  # ADJUSTMENT
+            else:
                 if amt >= 0:
                     income_col = amt
-                    total_income += Decimal(amt)
                 else:
                     expense_col = Decimal(amt)
-                    total_expense += Decimal(amt)
 
             rows.append({
                 'pk': t.pk,
@@ -53,13 +76,13 @@ class TransactionListView(LoginRequiredMixin, PermissionRequiredMixin, ListView)
                 'expense': expense_col,
                 'description': t.description or '',
             })
-
-        total_general = total_income + total_expense
         ctx.update({
             'rows': rows,
             'total_income': total_income,
             'total_expense': total_expense,
             'total_general': total_general,
+            'limited': limited,
+            'total_count': total_count,
         })
         return ctx
 
@@ -141,8 +164,8 @@ class TransactionReportView(LoginRequiredMixin, PermissionRequiredMixin, View):
         fmt = request.GET.get('format')
 
         qs = Transaction.objects.all().order_by('date')
-        errors = []
 
+        errors = []
         if desde:
             d = parse_date(desde)
             if not d:
@@ -156,30 +179,54 @@ class TransactionReportView(LoginRequiredMixin, PermissionRequiredMixin, View):
             else:
                 qs = qs.filter(date__lte=h)
 
-    # Construir filas con columnas separadas para ingreso/egreso
-        rows = []
+        # Preparar conjunto completo (filtrado) para cálculos de totales
+        full_qs = qs
+
+        # Calcular totales sobre el conjunto completo (filtrado)
         total_income = Decimal('0')
         total_expense = Decimal('0')
-        for t in qs:
+        for t in full_qs:
+            amt = t.amount
+            if t.type == Transaction.INCOME:
+                total_income += Decimal(amt)
+            elif t.type == Transaction.EXPENSE:
+                total_expense += -Decimal(amt)
+            else:
+                if amt >= 0:
+                    total_income += Decimal(amt)
+                else:
+                    total_expense += Decimal(amt)
+
+        total_general = total_income + total_expense
+
+        # Si no se pasa ?all=1, limitar la vista a 10 registros
+        show_all = request.GET.get('all') == '1'
+        total_count = full_qs.count()
+        if not show_all:
+            limited = total_count > 10
+            qs_display = full_qs[:10]
+        else:
+            limited = False
+            qs_display = full_qs
+
+        # Construir filas con columnas separadas para ingreso/egreso (para la vista)
+        rows = []
+        for t in qs_display:
             amt = t.amount
             income_col = None
             expense_col = None
             # Ingresos: type IN always positive
             if t.type == Transaction.INCOME:
                 income_col = amt
-                total_income += Decimal(amt)
             # Egresos: type EX shown as negative value in expense column
             elif t.type == Transaction.EXPENSE:
                 expense_col = -Decimal(amt)
-                total_expense += -Decimal(amt)
             # Ajustes: place according to sign
             else:  # ADJUSTMENT
                 if amt >= 0:
                     income_col = amt
-                    total_income += Decimal(amt)
                 else:
                     expense_col = Decimal(amt)  # amt is negative
-                    total_expense += Decimal(amt)
 
             rows.append({
                 'date': t.date,
@@ -189,10 +236,10 @@ class TransactionReportView(LoginRequiredMixin, PermissionRequiredMixin, View):
                 'description': t.description or '',
             })
 
-    # Total neto (ingresos + egresos, donde los egresos están como negativos)
-        total_general = total_income + total_expense
+        # Total neto (ingresos + egresos, donde los egresos están como negativos)
+        # (ya calculado más arriba sobre el conjunto completo)
 
-    # Si se solicita CSV, enviarlo en streaming con columnas separadas
+        # Si se solicita CSV, enviarlo en streaming con columnas separadas
         if fmt == 'csv' and not errors:
             resp = HttpResponse(content_type='text/csv')
             resp['Content-Disposition'] = 'attachment; filename="cooperadora_report.csv"'
@@ -220,4 +267,6 @@ class TransactionReportView(LoginRequiredMixin, PermissionRequiredMixin, View):
             'total_income': total_income,
             'total_expense': total_expense,
             'total_general': total_general,
+            'limited': limited,
+            'total_count': total_count,
         })

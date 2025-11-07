@@ -8,6 +8,11 @@
     <a class="btn" href="{% url 'cooperadora:transaction_add' %}">Nueva transacción</a>
   {% endif %}
 </p>
+{% if limited %}
+  <p><a class="btn--ghost" href="?all=1">Ver todo ({{ total_count }})</a></p>
+{% elif total_count and total_count > 10 %}
+  <p><a class="btn--ghost" href="?all=1">Ver todo ({{ total_count }})</a></p>
+{% endif %}
 <div class="table-wrapper">
   <table class="table">
   <thead>
