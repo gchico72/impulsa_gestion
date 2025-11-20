@@ -1,0 +1,11 @@
+{% extends 'base.html' %}
+{% block title %}Alumno — Impulsa{% endblock %}
+{% block content %}
+  <h2>{% if object %}Editar{% else %}Nuevo{% endif %} alumno</h2>
+  <form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button class="btn" type="submit">Guardar</button>
+    <a href="{% url 'students:list' %}" class="btn btn--ghost">Cancelar</a>
+  </form>
+{% endblock %}

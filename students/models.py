@@ -1,14 +1,10 @@
 from django.db import models
+from core.models import Person
 
 
-class Student(models.Model):
-    first_name = models.CharField(max_length=100)
-    last_name = models.CharField(max_length=100)
-    dni = models.CharField(max_length=20, blank=True)
+class Student(Person):
+    """Estudiante de la institución. Hereda atributos comunes de Person."""
     enrollment_date = models.DateField(null=True, blank=True)
-
-    def __str__(self):
-        return f"{self.last_name}, {self.first_name}"
 
 
 class StudentAttendance(models.Model):

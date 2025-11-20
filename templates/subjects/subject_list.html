@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+{% block title %}Asignaturas — Impulsa{% endblock %}
+{% block content %}
+  <h2>Asignaturas</h2>
+  <p>
+    <a class="btn" href="{% url 'subjects:create' %}">Nueva asignatura</a>
+    <form method="get" class="inline-search" style="display:inline-block; margin-left:1rem;">
+      <input type="search" name="q" placeholder="Buscar asignatura" value="{{ request.GET.q|default_if_none:'' }}" />
+      <button class="btn" type="submit">Buscar</button>
+    </form>
+  </p>
+  {% if subjects %}
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Nombre</th>
+          <th>Módulos presenciales / sem</th>
+          <th>Módulos tutoría / sem</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for s in subjects %}
+          <tr>
+            <td>{{ s.name }}</td>
+            <td>{{ s.weekly_hours_presential }}</td>
+            <td>{{ s.weekly_hours_tutoring|default:'-' }}</td>
+            <td>
+              <a href="{% url 'subjects:update' s.pk %}">Editar</a>
+              |
+              <a href="{% url 'subjects:delete' s.pk %}">Eliminar</a>
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% if is_paginated %}
+      <div class="pagination">
+        {% if page_obj.has_previous %}
+          <a href="?q={{ request.GET.q|urlencode }}&page={{ page_obj.previous_page_number }}">« anterior</a>
+        {% endif %}
+        <span>Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
+        {% if page_obj.has_next %}
+          <a href="?q={{ request.GET.q|urlencode }}&page={{ page_obj.next_page_number }}">siguiente »</a>
+        {% endif %}
+      </div>
+    {% endif %}
+  {% else %}
+    <p>No hay asignaturas cargadas.</p>
+  {% endif %}
+{% endblock %}

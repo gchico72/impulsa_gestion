@@ -22,6 +22,9 @@
           {% if user.is_authenticated and user.is_superuser or user.is_authenticated and 'courses.view_course' in user_perms %}
             <a href="/courses/">Cursos</a>
           {% endif %}
+          {% if user.is_authenticated and user.is_superuser or user.is_authenticated and 'subjects.view_subject' in user_perms %}
+            <a href="/subjects/">Asignaturas</a>
+          {% endif %}
           {% if user.is_authenticated and user.is_superuser or user.is_authenticated and 'teachers.view_teacher' in user_perms %}
             <a href="/teachers/">Docentes</a>
           {% endif %}

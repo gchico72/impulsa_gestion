@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+{% block title %}Docentes — Impulsa{% endblock %}
+{% block content %}
+  <h2>Docentes</h2>
+  <p>
+    <a class="btn" href="{% url 'teachers:create' %}">Nuevo docente</a>
+  </p>
+  {% if teachers %}
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Apellido y nombre</th>
+          <th>DNI</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for t in teachers %}
+          <tr>
+            <td>{{ t.last_name }}, {{ t.first_name }}</td>
+            <td>{{ t.dni }}</td>
+            <td>
+              <a href="{% url 'teachers:update' t.pk %}">Editar</a>
+              |
+              <a href="{% url 'teachers:delete' t.pk %}">Eliminar</a>
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% else %}
+    <p>No hay docentes cargados.</p>
+  {% endif %}
+{% endblock %}

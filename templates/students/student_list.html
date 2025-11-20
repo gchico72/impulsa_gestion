@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+{% block title %}Alumnos — Impulsa{% endblock %}
+{% block content %}
+  <h2>Alumnos</h2>
+  <p>
+    <a class="btn" href="{% url 'students:create' %}">Nuevo alumno</a>
+  </p>
+  {% if students %}
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Apellido y nombre</th>
+          <th>DNI</th>
+          <th>Fecha inscripción</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for s in students %}
+          <tr>
+            <td>{{ s.last_name }}, {{ s.first_name }}</td>
+            <td>{{ s.dni }}</td>
+            <td>{{ s.enrollment_date }}</td>
+            <td>
+              <a href="{% url 'students:update' s.pk %}">Editar</a>
+              |
+              <a href="{% url 'students:delete' s.pk %}">Eliminar</a>
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% else %}
+    <p>No hay alumnos cargados.</p>
+  {% endif %}
+{% endblock %}

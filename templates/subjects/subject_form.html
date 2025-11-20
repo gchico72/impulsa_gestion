@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+{% block title %}Asignatura — Impulsa{% endblock %}
+{% block content %}
+  <h2>{% if object %}Editar{% else %}Nueva{% endif %} asignatura</h2>
+  <form method="post">
+    {% csrf_token %}
+    <div class="form-row">
+      {{ form.name.label_tag }}
+      {{ form.name }}
+    </div>
+    <div class="form-row">
+      {{ form.weekly_hours_presential.label_tag }}
+      {{ form.weekly_hours_presential }} <small>módulos/sem</small>
+    </div>
+    <div class="form-row">
+      {{ form.weekly_hours_tutoring.label_tag }}
+      {{ form.weekly_hours_tutoring }} <small>módulos/sem (opcional)</small>
+    </div>
+    {% if form.non_field_errors %}
+      <div class="form-errors">{{ form.non_field_errors }}</div>
+    {% endif %}
+    <button class="btn" type="submit">Guardar</button>
+    <a href="{% url 'subjects:list' %}" class="btn btn--ghost">Cancelar</a>
+  </form>
+{% endblock %}

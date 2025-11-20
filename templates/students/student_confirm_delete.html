@@ -1,0 +1,11 @@
+{% extends 'base.html' %}
+{% block title %}Eliminar alumno — Impulsa{% endblock %}
+{% block content %}
+  <h2>Eliminar alumno</h2>
+  <p>¿Confirma que desea eliminar a <strong>{{ object }}</strong>?</p>
+  <form method="post">
+    {% csrf_token %}
+    <button class="btn btn--danger" type="submit">Eliminar</button>
+    <a href="{% url 'students:list' %}" class="btn btn--ghost">Cancelar</a>
+  </form>
+{% endblock %}

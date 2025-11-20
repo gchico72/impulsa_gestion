@@ -1,13 +1,11 @@
 from django.db import models
+from core.models import Person
 
 
-class Teacher(models.Model):
-    first_name = models.CharField(max_length=100)
-    last_name = models.CharField(max_length=100)
-    dni = models.CharField(max_length=20, blank=True)
-
-    def __str__(self):
-        return f"{self.last_name}, {self.first_name}"
+class Teacher(Person):
+    """Docente de la institución. Hereda atributos comunes de Person."""
+    # Si en el futuro se necesitan campos específicos de Teacher,
+    # pueden agregarse aquí.
 
 
 class TeacherAttendance(models.Model):
