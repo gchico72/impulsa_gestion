@@ -74,7 +74,7 @@ USE_I18N = True
 USE_TZ = True
 
 STATIC_URL = '/static/'
-
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 # Directorios adicionales para archivos estáticos (incluye carpeta graphics para el logo)
 STATICFILES_DIRS = [
     BASE_DIR / 'static',
