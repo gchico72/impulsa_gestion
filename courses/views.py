@@ -1,11 +1,11 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect, get_object_or_404
 from django.apps import apps
 from django.urls import reverse_lazy
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from django.views.generic import CreateView, UpdateView, DeleteView
 from django.contrib import messages
 
-from .forms import CourseForm, CourseMaterialForm
+from .forms import CourseForm, CourseMaterialForm, EnrollmentForm
 
 
 def index(request):
@@ -102,4 +102,49 @@ class CourseMaterialDeleteView(LoginRequiredMixin, PermissionRequiredMixin, Dele
         obj = self.get_object()
         resp = super().delete(request, *args, **kwargs)
         messages.success(request, f'Materia "{obj.subject}" eliminada del curso.')
+        return resp
+
+
+class EnrollmentCreateView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
+    """Enroll a student in a course."""
+    permission_required = 'courses.add_enrollment'
+    model = apps.get_model('courses', 'Enrollment')
+    form_class = EnrollmentForm
+    template_name = 'courses/enrollment_form.html'
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        # Pre-fill course if passed as query parameter
+        if 'course_id' in self.request.GET:
+            course_id = self.request.GET.get('course_id')
+            Course = apps.get_model('courses', 'Course')
+            course = get_object_or_404(Course, pk=course_id)
+            if kwargs['instance'] is None:
+                from .models import Enrollment
+                kwargs['instance'] = Enrollment(course=course)
+            else:
+                kwargs['instance'].course = course
+        return kwargs
+
+    def form_valid(self, form):
+        resp = super().form_valid(form)
+        messages.success(self.request, f'Estudiante "{form.instance.student}" matriculado en el curso.')
+        return resp
+
+    def get_success_url(self):
+        return reverse_lazy('courses:index')
+
+
+class EnrollmentDeleteView(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
+    """Remove a student from a course."""
+    permission_required = 'courses.delete_enrollment'
+    model = apps.get_model('courses', 'Enrollment')
+    template_name = 'courses/enrollment_confirm_delete.html'
+    success_url = reverse_lazy('courses:index')
+
+    def delete(self, request, *args, **kwargs):
+        obj = self.get_object()
+        student = obj.student
+        resp = super().delete(request, *args, **kwargs)
+        messages.success(request, f'Estudiante "{student}" eliminado del curso.')
         return resp

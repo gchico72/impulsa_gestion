@@ -9,6 +9,7 @@
 			{% if user.is_superuser or 'courses.add_course' in user_perms %}
 				<a class="button" href="{% url 'courses:add' %}">Agregar curso</a>
 				<a class="button" href="{% url 'courses:add_material' %}">Asignar materia a curso</a>
+				<a class="button" href="{% url 'courses:add_enrollment' %}">Matricular estudiante</a>
 			{% endif %}
 		{% endif %}
 	</div>
@@ -21,7 +22,7 @@
 				<th>Nivel</th>
 				<th>División</th>
 				<th>Especialidad</th>
-				<th>Inscripciones</th>
+				<th>Estudiantes</th>
 				<th>Materias</th>
 				<th>Acciones</th>
 			</tr>
@@ -33,7 +34,24 @@
 				<td>{{ item.instance.level.name }}</td>
 				<td>{{ item.instance.division.name }}</td>
 				<td>{% if item.instance.specialty %}{{ item.instance.specialty.name }}{% else %}—{% endif %}</td>
-				<td>{{ item.enrollments }}</td>
+				<td>
+					{% if item.instance.enrollment_set.all %}
+						<ul style="margin: 0; padding-left: 20px;">
+						{% for enrollment in item.instance.enrollment_set.all %}
+							<li>
+								{{ enrollment.student.first_name }} {{ enrollment.student.last_name }}
+								{% if user.is_authenticated %}
+									{% if user.is_superuser or 'courses.delete_enrollment' in user_perms %}
+										<a href="{% url 'courses:delete_enrollment' enrollment.pk %}" style="font-size: 0.9em;">Eliminar</a>
+									{% endif %}
+								{% endif %}
+							</li>
+						{% endfor %}
+						</ul>
+					{% else %}
+						<em>Sin estudiantes</em>
+					{% endif %}
+				</td>
 				<td>
 					{% for material in item.instance.materials.all %}
 						<div>{{ material.subject.name }} (Prof. {{ material.teacher.last_name }})
