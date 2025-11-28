@@ -6,14 +6,16 @@ from .models import Subject
 class SubjectForm(forms.ModelForm):
     class Meta:
         model = Subject
-        fields = ['name', 'weekly_hours_presential', 'weekly_hours_tutoring']
+        fields = ['name', 'grade', 'weekly_hours_presential', 'weekly_hours_tutoring']
         labels = {
             'name': 'Nombre de la asignatura',
+            'grade': 'Año / Curso',
             'weekly_hours_presential': 'Módulos semanales presenciales',
             'weekly_hours_tutoring': 'Módulos semanales de tutoría (opcional)',
         }
         widgets = {
             'name': forms.TextInput(attrs={'placeholder': 'Ej. Matemática'}),
+            'grade': forms.Select(),
             'weekly_hours_presential': forms.NumberInput(attrs={'min': 0, 'max': 20}),
             'weekly_hours_tutoring': forms.NumberInput(attrs={'min': 0, 'max': 20}),
         }
