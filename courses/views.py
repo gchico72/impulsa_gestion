@@ -79,6 +79,19 @@ class CourseMaterialCreateView(LoginRequiredMixin, PermissionRequiredMixin, Crea
         return resp
 
 
+class CourseMaterialUpdateView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
+    permission_required = 'courses.change_coursematerial'
+    model = apps.get_model('courses', 'CourseMaterial')
+    form_class = CourseMaterialForm
+    template_name = 'courses/coursematerial_form.html'
+    success_url = reverse_lazy('courses:index')
+
+    def form_valid(self, form):
+        resp = super().form_valid(form)
+        messages.success(self.request, f'Materia "{form.instance.subject}" actualizada correctamente.')
+        return resp
+
+
 class CourseMaterialDeleteView(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
     permission_required = 'courses.delete_coursematerial'
     model = apps.get_model('courses', 'CourseMaterial')

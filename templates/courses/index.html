@@ -38,6 +38,9 @@
 					{% for material in item.instance.materials.all %}
 						<div>{{ material.subject.name }} (Prof. {{ material.teacher.last_name }})
 						{% if user.is_authenticated %}
+							{% if user.is_superuser or 'courses.change_coursematerial' in user_perms %}
+								<a href="{% url 'courses:edit_material' material.pk %}">Editar</a>
+							{% endif %}
 							{% if user.is_superuser or 'courses.delete_coursematerial' in user_perms %}
 								<a href="{% url 'courses:delete_material' material.pk %}">Eliminar</a>
 							{% endif %}
