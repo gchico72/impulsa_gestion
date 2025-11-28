@@ -26,15 +26,4 @@ admin.site.register(Division)
 admin.site.register(Specialty)
 admin.site.register(Course, CourseAdmin)
 admin.site.register(Enrollment, EnrollmentAdmin)
-from django.contrib import admin
-from .models import Course, Enrollment
 
-
-@admin.register(Course)
-class CourseAdmin(admin.ModelAdmin):
-    list_display = ('name', 'code')
-
-
-@admin.register(Enrollment)
-class EnrollmentAdmin(admin.ModelAdmin):
-    list_display = ('student', 'course', 'enrolled_on')
