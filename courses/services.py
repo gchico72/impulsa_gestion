@@ -85,3 +85,52 @@ class EnrollmentService:
             level = Level.objects.get(pk=level)
 
         return Enrollment.objects.filter(course__level=level)
+
+
+class CourseMaterialService:
+    """Helper methods to manage Subject assignments in Courses with Teachers."""
+
+    @staticmethod
+    def add_material(course, subject, teacher):
+        """Assign a Subject to a Course with a Teacher.
+
+        Args:
+            course: Course instance or PK
+            subject: Subject instance or PK
+            teacher: Teacher instance or PK
+
+        Returns:
+            CourseMaterial instance
+
+        Raises:
+            IntegrityError if the subject is already assigned to the course.
+            ValueError if teacher is not valid.
+        """
+        CourseMaterial = apps.get_model('courses', 'CourseMaterial')
+        Course = apps.get_model('courses', 'Course')
+        Subject = apps.get_model('subjects', 'Subject')
+        Teacher = apps.get_model('teachers', 'Teacher')
+
+        if not hasattr(course, 'pk'):
+            course = Course.objects.get(pk=course)
+        if not hasattr(subject, 'pk'):
+            subject = Subject.objects.get(pk=subject)
+        if not hasattr(teacher, 'pk'):
+            teacher = Teacher.objects.get(pk=teacher)
+
+        try:
+            cm = CourseMaterial.objects.create(course=course, subject=subject, teacher=teacher)
+            return cm
+        except IntegrityError as e:
+            raise IntegrityError('Subject already assigned to this course') from e
+
+    @staticmethod
+    def list_materials_by_course(course):
+        """Return CourseMaterial queryset for a Course instance or PK."""
+        CourseMaterial = apps.get_model('courses', 'CourseMaterial')
+        Course = apps.get_model('courses', 'Course')
+
+        if not hasattr(course, 'pk'):
+            course = Course.objects.get(pk=course)
+
+        return CourseMaterial.objects.filter(course=course).select_related('subject', 'teacher')

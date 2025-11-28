@@ -8,4 +8,6 @@ urlpatterns = [
     path('add/', views.CourseCreateView.as_view(), name='add'),
     path('<int:pk>/edit/', views.CourseUpdateView.as_view(), name='edit'),
     path('<int:pk>/delete/', views.CourseDeleteView.as_view(), name='delete'),
+    path('material/add/', views.CourseMaterialCreateView.as_view(), name='add_material'),
+    path('material/<int:pk>/delete/', views.CourseMaterialDeleteView.as_view(), name='delete_material'),
 ]

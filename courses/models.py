@@ -73,3 +73,21 @@ class Enrollment(models.Model):
 
     def __str__(self):
         return f"{self.student} in {self.course}"
+
+
+class CourseMaterial(models.Model):
+    """Assign a Subject to a Course with an associated Teacher.
+
+    Each CourseMaterial represents a subject being taught in a course
+    by a specific teacher (e.g., "Matemática in Primero A taught by Prof. Garcia").
+    """
+    course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name='materials')
+    subject = models.ForeignKey('subjects.Subject', on_delete=models.CASCADE, related_name='course_materials')
+    teacher = models.ForeignKey('teachers.Teacher', on_delete=models.PROTECT, related_name='course_materials')
+
+    class Meta:
+        # Prevent duplicate subject assignments in the same course
+        unique_together = ('course', 'subject')
+
+    def __str__(self):
+        return f"{self.subject} in {self.course} (Prof. {self.teacher.last_name})"

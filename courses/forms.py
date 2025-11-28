@@ -1,5 +1,5 @@
 from django import forms
-from .models import Course
+from .models import Course, CourseMaterial
 
 
 class CourseForm(forms.ModelForm):
@@ -9,3 +9,9 @@ class CourseForm(forms.ModelForm):
         widgets = {
             'description': forms.Textarea(attrs={'rows': 3}),
         }
+
+
+class CourseMaterialForm(forms.ModelForm):
+    class Meta:
+        model = CourseMaterial
+        fields = ['course', 'subject', 'teacher']

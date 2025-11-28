@@ -8,6 +8,7 @@
 		{% if user.is_authenticated %}
 			{% if user.is_superuser or 'courses.add_course' in user_perms %}
 				<a class="button" href="{% url 'courses:add' %}">Agregar curso</a>
+				<a class="button" href="{% url 'courses:add_material' %}">Asignar materia a curso</a>
 			{% endif %}
 		{% endif %}
 	</div>
@@ -21,6 +22,8 @@
 				<th>División</th>
 				<th>Especialidad</th>
 				<th>Inscripciones</th>
+				<th>Materias</th>
+				<th>Acciones</th>
 			</tr>
 		</thead>
 		<tbody>
@@ -31,16 +34,29 @@
 				<td>{{ item.instance.division.name }}</td>
 				<td>{% if item.instance.specialty %}{{ item.instance.specialty.name }}{% else %}—{% endif %}</td>
 				<td>{{ item.enrollments }}</td>
-								<td>
-									{% if user.is_authenticated %}
-										{% if user.is_superuser or 'courses.change_course' in user_perms %}
-											<a href="{% url 'courses:edit' item.instance.pk %}">Editar</a>
-										{% endif %}
-										{% if user.is_superuser or 'courses.delete_course' in user_perms %}
-											<a href="{% url 'courses:delete' item.instance.pk %}">Eliminar</a>
-										{% endif %}
-									{% endif %}
-								</td>
+				<td>
+					{% for material in item.instance.materials.all %}
+						<div>{{ material.subject.name }} (Prof. {{ material.teacher.last_name }})
+						{% if user.is_authenticated %}
+							{% if user.is_superuser or 'courses.delete_coursematerial' in user_perms %}
+								<a href="{% url 'courses:delete_material' material.pk %}">Eliminar</a>
+							{% endif %}
+						{% endif %}
+						</div>
+					{% empty %}
+						<em>Sin materias</em>
+					{% endfor %}
+				</td>
+				<td>
+					{% if user.is_authenticated %}
+						{% if user.is_superuser or 'courses.change_course' in user_perms %}
+							<a href="{% url 'courses:edit' item.instance.pk %}">Editar</a>
+						{% endif %}
+						{% if user.is_superuser or 'courses.delete_course' in user_perms %}
+							<a href="{% url 'courses:delete' item.instance.pk %}">Eliminar</a>
+						{% endif %}
+					{% endif %}
+				</td>
 			</tr>
 			{% endfor %}
 		</tbody>

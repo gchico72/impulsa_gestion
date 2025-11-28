@@ -1,0 +1,11 @@
+{% extends 'base.html' %}
+{% block title %}Eliminar Materia del Curso — Impulsa{% endblock %}
+{% block content %}
+  <h2>Confirmar eliminación</h2>
+  <p>¿Eliminar la materia "{{ object.subject }}" del curso "{{ object.course }}"?</p>
+  <form method="post">
+    {% csrf_token %}
+    <button type="submit">Confirmar eliminación</button>
+    <a href="{% url 'courses:index' %}">Cancelar</a>
+  </form>
+{% endblock %}

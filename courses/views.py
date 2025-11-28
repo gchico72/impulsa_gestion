@@ -5,7 +5,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMix
 from django.views.generic import CreateView, UpdateView, DeleteView
 from django.contrib import messages
 
-from .forms import CourseForm
+from .forms import CourseForm, CourseMaterialForm
 
 
 def index(request):
@@ -63,4 +63,30 @@ class CourseDeleteView(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
         obj = self.get_object()
         resp = super().delete(request, *args, **kwargs)
         messages.success(request, f'Curso "{obj}" eliminado correctamente.')
+        return resp
+
+
+class CourseMaterialCreateView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
+    permission_required = 'courses.add_coursematerial'
+    model = apps.get_model('courses', 'CourseMaterial')
+    form_class = CourseMaterialForm
+    template_name = 'courses/coursematerial_form.html'
+    success_url = reverse_lazy('courses:index')
+
+    def form_valid(self, form):
+        resp = super().form_valid(form)
+        messages.success(self.request, f'Materia "{form.instance.subject}" asignada al curso.')
+        return resp
+
+
+class CourseMaterialDeleteView(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
+    permission_required = 'courses.delete_coursematerial'
+    model = apps.get_model('courses', 'CourseMaterial')
+    template_name = 'courses/coursematerial_confirm_delete.html'
+    success_url = reverse_lazy('courses:index')
+
+    def delete(self, request, *args, **kwargs):
+        obj = self.get_object()
+        resp = super().delete(request, *args, **kwargs)
+        messages.success(request, f'Materia "{obj.subject}" eliminada del curso.')
         return resp

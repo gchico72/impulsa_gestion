@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import Level, Division, Specialty, Course, Enrollment
+from .models import Level, Division, Specialty, Course, Enrollment, CourseMaterial
 
 
 class EnrollmentInline(admin.TabularInline):
@@ -8,11 +8,17 @@ class EnrollmentInline(admin.TabularInline):
     extra = 0
 
 
+class CourseMaterialInline(admin.TabularInline):
+    model = CourseMaterial
+    extra = 0
+    raw_id_fields = ('subject', 'teacher')
+
+
 class CourseAdmin(admin.ModelAdmin):
     list_display = ('name', 'level', 'division', 'specialty', 'code')
     list_filter = ('level', 'division', 'specialty')
     search_fields = ('name', 'code', 'specialty__name')
-    inlines = [EnrollmentInline]
+    inlines = [EnrollmentInline, CourseMaterialInline]
 
 
 class EnrollmentAdmin(admin.ModelAdmin):
@@ -26,4 +32,5 @@ admin.site.register(Division)
 admin.site.register(Specialty)
 admin.site.register(Course, CourseAdmin)
 admin.site.register(Enrollment, EnrollmentAdmin)
+admin.site.register(CourseMaterial)
 
