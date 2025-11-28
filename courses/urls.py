@@ -5,4 +5,7 @@ app_name = 'courses'
 
 urlpatterns = [
     path('', views.index, name='index'),
+    path('add/', views.CourseCreateView.as_view(), name='add'),
+    path('<int:pk>/edit/', views.CourseUpdateView.as_view(), name='edit'),
+    path('<int:pk>/delete/', views.CourseDeleteView.as_view(), name='delete'),
 ]

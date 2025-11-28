@@ -3,4 +3,49 @@
 {% block content %}
 	<h2>Cursos</h2>
 	<p>Módulo de gestión de cursos y matrículas.</p>
+
+	<div class="actions">
+		{% if user.is_authenticated %}
+			{% if user.is_superuser or 'courses.add_course' in user_perms %}
+				<a class="button" href="{% url 'courses:add' %}">Agregar curso</a>
+			{% endif %}
+		{% endif %}
+	</div>
+
+	{% if courses %}
+	<table class="table">
+		<thead>
+			<tr>
+				<th>Curso</th>
+				<th>Nivel</th>
+				<th>División</th>
+				<th>Especialidad</th>
+				<th>Inscripciones</th>
+			</tr>
+		</thead>
+		<tbody>
+			{% for item in courses %}
+			<tr>
+				<td>{{ item.instance.name }}</td>
+				<td>{{ item.instance.level.name }}</td>
+				<td>{{ item.instance.division.name }}</td>
+				<td>{% if item.instance.specialty %}{{ item.instance.specialty.name }}{% else %}—{% endif %}</td>
+				<td>{{ item.enrollments }}</td>
+								<td>
+									{% if user.is_authenticated %}
+										{% if user.is_superuser or 'courses.change_course' in user_perms %}
+											<a href="{% url 'courses:edit' item.instance.pk %}">Editar</a>
+										{% endif %}
+										{% if user.is_superuser or 'courses.delete_course' in user_perms %}
+											<a href="{% url 'courses:delete' item.instance.pk %}">Eliminar</a>
+										{% endif %}
+									{% endif %}
+								</td>
+			</tr>
+			{% endfor %}
+		</tbody>
+	</table>
+	{% else %}
+	<p>No hay cursos definidos todavía.</p>
+	{% endif %}
 {% endblock %}
